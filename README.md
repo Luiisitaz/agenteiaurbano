@@ -1,6 +1,6 @@
 ﻿# Urban AI Agent - Reportes Urbanos Inteligentes
 
-**Para probar el agente entra aqu?:** [http://35.226.107.16:8000/app](http://35.226.107.16:8000/app)
+**Para probar el agente entra aqui:** [http://35.226.107.16:8000/app](http://35.226.107.16:8000/app)
 
 
 Este proyecto implementa un asistente ciudadano para reportar incidentes urbanos usando LangGraph, FastAPI, PostgreSQL + PostGIS + pgvector y un mapa Leaflet.
