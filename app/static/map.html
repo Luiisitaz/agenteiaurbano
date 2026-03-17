@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban AI Agent - Map</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: linear-gradient(180deg, #f7f9ff 0%, #eef3fb 100%);
+      font-family: "Space Grotesk", system-ui, sans-serif;
+    }
+    #map { height: 100%; }
+    .legend {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 1000;
+      display: grid;
+      gap: 8px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(166, 182, 214, 0.24);
+      box-shadow: 0 12px 24px rgba(17, 28, 54, 0.12);
+      font-size: 12px;
+      color: #51607a;
+    }
+    .legend strong {
+      color: #172033;
+      font-size: 13px;
+    }
+    .legend__row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .legend__dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+    .legend__dot--high { background: #dd4b43; }
+    .legend__dot--medium { background: #f29a38; }
+    .legend__dot--low { background: #2a73ff; }
+    .cluster-marker {
+      background: transparent;
+      border: none;
+    }
+    .cluster-pin {
+      position: relative;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-weight: 700;
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 16px 24px rgba(17, 28, 54, 0.18);
+    }
+    .cluster-pin--single {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+    }
+    .cluster-pin--group {
+      width: 44px;
+      height: 44px;
+      border-radius: 18px;
+    }
+    .cluster-pin--high {
+      background: linear-gradient(135deg, #cb3d37 0%, #f06158 100%);
+    }
+    .cluster-pin--medium {
+      background: linear-gradient(135deg, #e58524 0%, #ffb04d 100%);
+    }
+    .cluster-pin--low {
+      background: linear-gradient(135deg, #1f63e8 0%, #4e8eff 100%);
+    }
+    .cluster-pin__label {
+      font-size: 14px;
+    }
+    .cluster-pin__dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.96);
+    }
+    .cluster-popup {
+      line-height: 1.5;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="legend">
+    <strong>Clusters de incidentes</strong>
+    <div class="legend__row"><span class="legend__dot legend__dot--high"></span>Prioridad alta</div>
+    <div class="legend__row"><span class="legend__dot legend__dot--medium"></span>Prioridad media</div>
+    <div class="legend__row"><span class="legend__dot legend__dot--low"></span>Prioridad baja</div>
+  </div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script>
+    const map = L.map("map").setView([8.9833, -79.5167], 12);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "© OpenStreetMap",
+    }).addTo(map);
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatPriorityLabel(priority) {
+      if (priority === "high") return "Alta";
+      if (priority === "medium") return "Media";
+      if (priority === "low") return "Baja";
+      return "Media";
+    }
+
+    function createClusterIcon(cluster) {
+      const count = Number(cluster.count || 0);
+      const isGroup = count > 1;
+      const className = [
+        "cluster-pin",
+        `cluster-pin--${cluster.priority || "medium"}`,
+        isGroup ? "cluster-pin--group" : "cluster-pin--single",
+      ].join(" ");
+      const label = isGroup ? `<span class="cluster-pin__label">${count}</span>` : '<span class="cluster-pin__dot"></span>';
+      return L.divIcon({
+        className: "cluster-marker",
+        html: `<div class="${className}">${label}</div>`,
+        iconSize: isGroup ? [44, 44] : [28, 28],
+        iconAnchor: isGroup ? [22, 22] : [14, 14],
+        popupAnchor: [0, -18],
+      });
+    }
+
+    function buildClusterPopup(cluster) {
+      const ids = (cluster.report_ids || []).map((id) => `#${id}`).join(", ");
+      const area = cluster.location_text || "Sin referencia";
+      const countLabel = Number(cluster.count || 0) === 1 ? "1 reporte" : `${cluster.count} reportes`;
+      return `
+        <div class="cluster-popup">
+          <strong>${escapeHtml(cluster.report_type)}</strong><br />
+          ${escapeHtml(countLabel)}<br />
+          Prioridad: ${escapeHtml(formatPriorityLabel(cluster.priority))}<br />
+          Area: ${escapeHtml(area)}<br />
+          IDs: ${escapeHtml(ids)}
+        </div>
+      `;
+    }
+
+    async function loadClusters() {
+      const res = await fetch("/reports/clusters?scope=all");
+      if (!res.ok) return;
+      const data = await res.json();
+      const bounds = [];
+      data.forEach((cluster) => {
+        const marker = L.marker([cluster.lat, cluster.lon], { icon: createClusterIcon(cluster) }).addTo(map);
+        marker.bindPopup(buildClusterPopup(cluster));
+        bounds.push([cluster.lat, cluster.lon]);
+      });
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 14);
+      } else if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [24, 24], maxZoom: 14 });
+      }
+    }
+
+    loadClusters();
+  </script>
+</body>
+</html>

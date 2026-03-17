@@ -1,0 +1,40 @@
+﻿services:
+  db:
+    build:
+      context: .
+      dockerfile: docker/db/Dockerfile
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "12345"
+      POSTGRES_DB: urban_reports
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d urban_reports"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:12345@db:5432/urban_reports
+      LOG_LEVEL: info
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      GEOCODING_PROVIDER: ${GEOCODING_PROVIDER:-google_places}
+      GOOGLE_PLACES_REGION: ${GOOGLE_PLACES_REGION:-pa}
+      GOOGLE_PLACES_LANGUAGE: ${GOOGLE_PLACES_LANGUAGE:-es}
+      CLUSTER_RADIUS_M: ${CLUSTER_RADIUS_M:-100}
+    ports:
+      - "8000:8000"
+volumes:
+  pgdata:

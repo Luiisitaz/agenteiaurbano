@@ -1,0 +1,13 @@
+﻿fastapi
+uvicorn[standard]
+langchain
+langgraph
+langchain-openai
+openai
+sqlalchemy
+psycopg2-binary
+pgvector
+geopy
+python-dotenv
+pydantic
+requests

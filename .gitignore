@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.venv/
+venv/
+
+# Env secrets
+.env
+.env.*
+
+# Logs
+logs/
+*.log
+uvicorn*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# PIDs
+*.pid

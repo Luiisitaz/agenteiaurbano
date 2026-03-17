@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urban AI Agent - Chat</title>
+  <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="18" fill="%23235cff"/><path d="M18 20h28v6H18zm0 12h28v6H18zm0 12h18v6H18z" fill="%23ffffff"/></svg>' />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="/assets/app/styles.css" />
+</head>
+<body>
+  <header class="hero hero--compact">
+    <div class="hero__content">
+      <div class="eyebrow">Urban AI Agent</div>
+      <h1>Chat del agente urbano</h1>
+      <p>Escribe tu mensaje y el agente se encargara del resto.</p>
+    </div>
+  </header>
+
+  <main class="grid grid--single">
+    <section class="panel panel--map">
+      <div class="panel__header">
+        <div>
+          <h2>Mapa de reportes</h2>
+          <p>Visualiza los reportes a traves del mapa.</p>
+        </div>
+        <button id="refresh-map" class="btn btn--ghost">Actualizar mapa</button>
+      </div>
+      <div id="map"></div>
+      <div class="map-legend" aria-label="Leyenda de prioridades">
+        <span class="map-legend__item"><span class="map-legend__dot map-legend__dot--high"></span>Prioridad alta</span>
+        <span class="map-legend__item"><span class="map-legend__dot map-legend__dot--medium"></span>Prioridad media</span>
+        <span class="map-legend__item"><span class="map-legend__dot map-legend__dot--low"></span>Prioridad baja</span>
+      </div>
+      <div id="map-detail" class="map-detail">Selecciona un cluster para ver detalle.</div>
+    </section>
+
+    <section class="panel panel--chat">
+      <div class="panel__header">
+        <div>
+          <h2>Conversacion</h2>
+          <p>Prueba el agente con mensajes libres.</p>
+        </div>
+        <div class="chat-hint">Sesion: <span id="session-id">auto</span></div>
+      </div>
+      <div class="chat-shell">
+        <div id="chat-log" class="chat-log" aria-live="polite">
+          <div id="chat-empty" class="chat-empty">
+            <strong>Empieza la conversacion</strong>
+            <span>Describe el incidente como si estuvieras hablando con una persona. El agente te ira guiando paso a paso.</span>
+          </div>
+        </div>
+      </div>
+      <form id="chat-form" class="form form--inline">
+        <div class="composer">
+          <input id="chat-input" name="message" placeholder="Escribe tu mensaje" autocomplete="off" required />
+          <div class="composer__footer">
+            <div id="chat-status" class="chat-status">Listo para enviar</div>
+            <button id="send-button" type="submit" class="btn btn--send" disabled>Enviar</button>
+          </div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>Urban AI Agent ? Chat local</span>
+    <span>Ruta API: /chat</span>
+  </footer>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="/assets/app/app.js?v=20260317"></script>
+</body>
+</html>
